@@ -45,6 +45,37 @@ double count_sort_parallel(double b[], int n, int nt) {
 	#endif
 }
 
+double count_sort_serial(double b[], int n) {
+		int i, j, count;
+		double *temp;
+		double duracao;
+		clock_t start, end;
+
+		temp = (double *)malloc(n*sizeof(double));
+
+		start = clock();
+
+		for (i = 0; i < n; i++) {
+			count = 0;
+			for (j = 0; j < n; j++)
+				if (b[j] < b[i])
+					count++;
+				else if (b[j] == b[i] && j < i)
+					count++;
+			temp[count] = b[i];
+		}
+
+			end = clock();
+
+			duracao = (double)(end - start) / CLOCKS_PER_SEC;
+
+			memcpy(b, temp, n*sizeof(double));
+			free(temp);
+
+			return duracao;
+
+}
+
 int main(int argc, char * argv[]) {
 	int i, n, nt;
 	double  *b, t_p;
@@ -64,8 +95,11 @@ int main(int argc, char * argv[]) {
 	}
 
 	/* chama as funcoes de count sort em paralelo e em serial */
-	t_p = count_sort_parallel(b, n, nt);
-
+	#ifdef _OPENMP
+		t_p = count_sort_parallel(b, n, nt);
+	#else
+		t_p = count_sort_serial(b, n);
+	#endif
 	/* imprime o vetores ordenado */
 
 	for(i=0;i<n;i++)
